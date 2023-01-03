@@ -1,0 +1,2 @@
+class MessageNotSentError(Exception):
+    pass

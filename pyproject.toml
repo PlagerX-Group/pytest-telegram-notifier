@@ -1,0 +1,105 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "pytest-telegram-notify"
+dynamic = ["version"]
+readme = "README.md"
+requires-python = ">=3.9.6"
+description = "TODO: do it"
+license = {file = "LICENSE.rst"}
+authors = [{ name = 'Kirill Matveev', email = 'matveevkirill@internet.ru' }]
+maintainers = [{ name = 'Kirill Matveev', email = 'matveevkirill@internet.ru' }]
+keywords = ["pytest-telegram-notify"]
+classifiers = [
+    'Development Status :: 1 - Planning',
+    'Framework :: Pytest',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Topic :: Software Development :: Quality Assurance',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.9',
+]
+
+[project.urls]
+"Github" = "https://github.com/PlagerX-Group/python-telegram-notify"
+"Issues" = "https://github.com/PlagerX-Group/python-telegram-notify/issues"
+
+[project.entry-points.pytest11]
+telegram_notify = "telegram_notify.plugin"
+
+
+[tool.setuptools_scm]
+write_to = "telegram_notify/_version.py"
+
+[tool.setuptools.packages.find]
+include = ["telegram_notify"]
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+skip-string-normalization = 1
+extend-ignore = "W503"
+
+[tool.pylint]
+    [tool.pylint.main]
+    fail-under = 10
+    ignore = "csv"
+    jobs = 2
+    limit-inference-results = 100
+    py-version = "3.9"
+    verbose = true
+    init-hook='import sys; sys.path.append(".")'
+
+    [tool.pylint.messages_control]
+    max-line-length = 120
+    confidence = [
+        "HIGH",
+        "CONTROL_FLOW",
+        "INFERENCE",
+        "INFERENCE_FAILURE",
+        "UNDEFINED"
+    ]
+    enable = [
+        "c-extension-no-member"
+    ]
+    disable = [
+        "raw-checker-failed",
+        "bad-inline-option",
+        "locally-disabled",
+        "file-ignored",
+        "suppressed-message",
+        "useless-suppression",
+        "deprecated-pragma",
+        "use-symbolic-message-instead",
+        "missing-module-docstring",
+        "missing-class-docstring",
+        "missing-function-docstring",
+        "too-few-public-methods",
+        "unnecessary-lambda-assignment",
+        "too-many-arguments",
+        "too-many-public-methods",
+        "import-outside-toplevel",
+        "too-many-locals",
+        "too-many-branches",
+        "redefined-outer-name",
+        "unused-argument",
+        "attribute-defined-outside-init",
+        "fixme",
+        "too-many-lines"
+    ]
+
+
+[tool.flake8]
+max-line-length = 120
+max-complexity = 10
+ignore = ["E731", "W503"]
+exclude = ".git, .mypy_cache, .pytest_cache, build, dist, __pycache__"
+
+[tool.isort]
+profile = "black"
+
+[tool.pycln]
+all = true
