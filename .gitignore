@@ -130,3 +130,4 @@ dmypy.json
 .idea/
 tests_for_tests/
 pytest-telegram-notifier-test.ini
+telegram_notifier/_version.py
