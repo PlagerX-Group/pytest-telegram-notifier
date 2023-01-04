@@ -1,7 +1,9 @@
 import pytest
 from _pytest.config.argparsing import Parser
-from _pytest.fixtures import Config
+from _pytest.fixtures import Config, FixtureRequest
 from pluggy import PluginManager
+
+from .telegram_manager import TelegramManager, TelegramManagerAdditionalFieldsWorker
 
 
 @pytest.hookimpl
@@ -32,7 +34,10 @@ def pytest_configure(config: Config):
     if not config.option.telegram_notifier:
         return
 
-    from .telegram_manager import TelegramManager
-
     manager = TelegramManager(config)
-    config.pluginmanager.register(manager, "telegram_notifier")
+    config.pluginmanager.register(manager, "telegram_notifier_2")
+
+
+@pytest.fixture(scope="session")
+def telegram_notifier_bot(request: FixtureRequest) -> TelegramManagerAdditionalFieldsWorker:
+    return request.config.pluginmanager.get_plugin('telegram_notifier_2').additional_fields_worker

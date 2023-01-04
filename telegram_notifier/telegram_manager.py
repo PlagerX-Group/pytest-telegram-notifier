@@ -1,3 +1,4 @@
+import copy
 import os
 from datetime import datetime
 
@@ -9,15 +10,37 @@ from _pytest.nodes import Item
 from telegram_notifier.bot import TelegramBot
 
 
+class TelegramManagerAdditionalFieldsWorker:
+
+    def __init__(self):
+        self.__fields = {}
+
+    @property
+    def fields(self) -> dict:
+        return copy.deepcopy(self.__fields)
+
+    def register_additional_field(self, key, value) -> None:
+        self.__fields.update({str(key): str(value)})
+
+    def register_additional_fields(self, fields: dict) -> None:
+        for key, value in fields.items():
+            self.register_additional_field(key, value)
+
+
 class TelegramManager:
     def __init__(self, config: Config):
         self._config = config
+        self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
         self._bot = TelegramBot(
             os.path.join(os.path.abspath(os.pardir), config.option.telegram_notifier_config_file),
         )
 
+    @property
+    def additional_fields_worker(self) -> TelegramManagerAdditionalFieldsWorker:
+        return self._additional_fields_worker
+
     @pytest.hookimpl(trylast=True)
-    def pytest_telegram_notifier_message_additional_fields(self, config: Config) -> dict:
+    def pytest_telegram_notifier_message_additional_fields(self) -> dict:
         return {}
 
     @pytest.hookimpl
@@ -54,9 +77,15 @@ class TelegramManager:
 
     @pytest.hookimpl
     def pytest_sessionfinish(self, session: Session):
-        additional_fields = self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)[0]
-        template = self._config.hook.pytest_telegram_notifier_message_template(additional_fields=additional_fields)[0]
-        self._bot.send_message(
+        self._additional_fields_worker.register_additional_fields(
+            self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)[0]
+        )
+
+        template = self._config.hook.pytest_telegram_notifier_message_template(
+            additional_fields=self.additional_fields_worker.fields,
+        )[0]
+
+        self._bot._send_message(
             template,
             datetimestart=self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
             datetimeend=datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
