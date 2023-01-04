@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pytest
 import requests
@@ -21,11 +22,17 @@ class TelegramManager:
 
     @pytest.hookimpl
     def pytest_telegram_notify_message_template(self) -> str:
-        template = "Total tests: {teststotal}\n" \
+        template = "Datetime start testing: {datetimestart}\n" \
+                   "Datetime end testing: {datetimeend}\n" \
+                   "Total tests: {teststotal}\n" \
                    "Tests failed: {testsfailed}\n" \
                    "Tests passed: {testspassed}\n" \
                    "Tests skipped: {testsskipped}\n"
         return template
+
+    @pytest.hookimpl(trylast=True)
+    def pytest_sessionstart(self):
+        self.datetime_start_tests = datetime.now()
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, items: list[Item]):
@@ -43,9 +50,11 @@ class TelegramManager:
     def pytest_sessionfinish(self, session: Session):
         message_template = self._config.hook.pytest_telegram_notify_message_template()[0]
         self._bot.send_message(
-            self.teststotal,
-            self.teststotal - session.testsfailed - self.testsskipped,
-            session.testsfailed,
-            self.testsskipped,
-            template=message_template
+            message_template,
+            datetimestart=self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
+            datetimeend=datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
+            teststotal=self.teststotal,
+            testspassed=self.teststotal - session.testsfailed - self.testsskipped,
+            testsfailed=session.testsfailed,
+            testsskipped=self.testsskipped,
         )
