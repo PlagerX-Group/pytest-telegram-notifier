@@ -17,4 +17,6 @@ class TelegramBot:
         self._telegram_bot.stop_bot()
 
     def send_message(self, template: str, **kwargs) -> None:
-        self._telegram_bot.send_message(self._chat_id, template.format(**kwargs))
+        self._telegram_bot.send_message(
+            self._chat_id, template.format(**kwargs).encode(encoding='utf-8'), parse_mode='markdown',
+        )
