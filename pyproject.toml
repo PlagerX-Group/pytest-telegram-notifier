@@ -14,11 +14,14 @@ authors = [{ name = 'Kirill Matveev', email = 'matveevkirill@internet.ru' }]
 maintainers = [{ name = 'Kirill Matveev', email = 'matveevkirill@internet.ru' }]
 keywords = ["pytest-telegram-notifier"]
 classifiers = [
-    'Development Status :: 1 - Planning',
     'Framework :: Pytest',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: Apache Software License',
+    'Development Status :: 5 - Production/Stable',
+    'Operating System :: MacOS',
+    'Operating System :: Microsoft :: Windows',
     'Topic :: Software Development :: Quality Assurance',
+    'Topic :: Software Development :: Testing',
     'Programming Language :: Python :: 3 :: Only',
     'Programming Language :: Python :: 3.9',
 ]

@@ -58,6 +58,7 @@ class TelegramManager:
             template += "\n\n------- Additional fields -------\n"
             for key, value in additional_fields.items():
                 template += f"\U000025AA *{key}:* {value}\n"
+        template = template.replace('_', r'\_')
         return template
 
     @pytest.hookimpl(trylast=True)
