@@ -27,8 +27,8 @@ classifiers = [
 ]
 
 [project.urls]
-"Github" = "https://github.com/PlagerX-Group/python-telegram-notifier"
-"Issues" = "https://github.com/PlagerX-Group/python-telegram-notifier/issues"
+"Github" = "https://github.com/PlagerX-Group/pytest-telegram-notifier"
+"Issues" = "https://github.com/PlagerX-Group/pytest-telegram-notifier/issues"
 
 [project.entry-points.pytest11]
 telegram_notifier = "telegram_notifier.plugin"
