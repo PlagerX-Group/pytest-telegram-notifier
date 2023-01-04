@@ -6,17 +6,17 @@ from pluggy import PluginManager
 
 @pytest.hookimpl
 def pytest_addoption(parser: Parser):
-    group = parser.getgroup("telegram_notify")
+    group = parser.getgroup("telegram_notifier")
     group.addoption(
-        "--telegram-notify",
+        "--telegram-notifier",
         action="store_true",
-        dest="telegram_notify",
+        dest="telegram_notifier",
     )
     group.addoption(
-        "--telegram-notify-config-file",
+        "--telegram-notifier-config-file",
         action="store",
-        dest="telegram_notify_config_file",
-        default="pytest-telegram-notify.ini",
+        dest="telegram_notifier_config_file",
+        default="pytest-telegram-notifier.ini",
     )
 
 
@@ -29,7 +29,7 @@ def pytest_addhooks(pluginmanager: PluginManager):
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config):
-    if not config.option.telegram_notify:
+    if not config.option.telegram_notifier:
         return
 
     from .telegram_manager import TelegramManager

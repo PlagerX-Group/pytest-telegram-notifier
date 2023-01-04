@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "pytest-telegram-notify"
+name = "pytest-telegram-notifier"
 dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.9.6"
@@ -12,7 +12,7 @@ description = "TODO: do it"
 license = {file = "LICENSE.rst"}
 authors = [{ name = 'Kirill Matveev', email = 'matveevkirill@internet.ru' }]
 maintainers = [{ name = 'Kirill Matveev', email = 'matveevkirill@internet.ru' }]
-keywords = ["pytest-telegram-notify"]
+keywords = ["pytest-telegram-notifier"]
 classifiers = [
     'Development Status :: 1 - Planning',
     'Framework :: Pytest',
@@ -24,18 +24,18 @@ classifiers = [
 ]
 
 [project.urls]
-"Github" = "https://github.com/PlagerX-Group/python-telegram-notify"
-"Issues" = "https://github.com/PlagerX-Group/python-telegram-notify/issues"
+"Github" = "https://github.com/PlagerX-Group/python-telegram-notifier"
+"Issues" = "https://github.com/PlagerX-Group/python-telegram-notifier/issues"
 
 [project.entry-points.pytest11]
-telegram_notify = "telegram_notify.plugin"
+telegram_notifier = "telegram_notifier.plugin"
 
 
 [tool.setuptools_scm]
-write_to = "telegram_notify/_version.py"
+write_to = "telegram_notifier/_version.py"
 
 [tool.setuptools.packages.find]
-include = ["telegram_notify"]
+include = ["telegram_notifier"]
 
 [tool.black]
 line-length = 120

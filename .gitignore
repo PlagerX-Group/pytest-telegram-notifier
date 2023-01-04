@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 .idea/
 tests_for_tests/
-pytest-telegram-notify-test.ini
+pytest-telegram-notifier-test.ini
