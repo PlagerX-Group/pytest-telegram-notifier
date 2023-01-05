@@ -43,7 +43,7 @@ class TelegramManager:
     def pytest_telegram_notifier_message_additional_fields(self) -> dict:
         return {}
 
-    @pytest.hookimpl
+    @pytest.hookimpl(trylast=True)
     def pytest_telegram_notifier_message_template(self, additional_fields: dict) -> str:
         template = (
             "---------- Test report ----------\n"
