@@ -6,6 +6,16 @@
 [![Open Source Helpers](https://www.codetriage.com/plagerx-group/pytest-telegram-notifier/badges/users.svg)](https://www.codetriage.com/plagerx-group/pytest-telegram-notifier)
 
 
+#### To activate the plugin, you must use the parameter
+```text
+--telegram-notifier
+```
+
+#### Custom path or configuration file name
+```text
+--telegram-notifier-config-file <custom-path>
+```
+
 #### An example of plugin configuration:
 ```ini
 [Telegram]
