@@ -1,0 +1,61 @@
+default_language_version:
+  python: python3
+repos:
+  - repo: https://github.com/dannysepler/rm_unneeded_f_str
+    rev: v0.1.0
+    hooks:
+    -   id: rm-unneeded-f-str
+  - repo: https://github.com/psf/black
+    rev: 22.12.0
+    hooks:
+    - id: black
+      language_version: python3.9
+  - repo: https://github.com/hadialqattan/pycln
+    rev: v2.1.2
+    hooks:
+      - id: pycln
+        args: [ --config=pyproject.toml ]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-docstring-first
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+      - id: check-xml
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+        args:
+          - --allow-multiple-documents
+      - id: debug-statements
+      - id: detect-private-key
+      - id: double-quote-string-fixer
+      - id: end-of-file-fixer
+      - id: name-tests-test
+        args:
+          - --pytest-test-first
+      - id: pretty-format-json
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+    - id: flake8
+      entry: pflake8
+      additional_dependencies: [pyproject-flake8]
+  - repo: https://github.com/pycqa/isort
+    rev: 5.11.4
+    hooks:
+      - id: isort
+        name: isort (python)
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: 'v1.9.0'
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-mock-methods
+      - id: python-no-eval
+      - id: python-no-log-warn
+      - id: python-use-type-annotations

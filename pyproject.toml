@@ -8,7 +8,7 @@ name = "pytest-telegram-notifier"
 dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.9.6"
-description = "TODO: do it"
+description = "Telegram notification plugin for Pytest"
 license = {file = "LICENSE.rst"}
 authors = [{ name = 'Kirill Matveev', email = 'matveevkirill@internet.ru' }]
 maintainers = [{ name = 'Kirill Matveev', email = 'matveevkirill@internet.ru' }]
@@ -82,16 +82,7 @@ extend-ignore = "W503"
         "missing-function-docstring",
         "too-few-public-methods",
         "unnecessary-lambda-assignment",
-        "too-many-arguments",
-        "too-many-public-methods",
-        "import-outside-toplevel",
-        "too-many-locals",
-        "too-many-branches",
-        "redefined-outer-name",
-        "unused-argument",
-        "attribute-defined-outside-init",
         "fixme",
-        "too-many-lines"
     ]
 
 
