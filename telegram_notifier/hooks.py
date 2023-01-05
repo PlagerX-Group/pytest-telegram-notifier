@@ -1,3 +1,5 @@
+# pylint: disable=W0613
+
 import pytest
 from _pytest.config import Config
 

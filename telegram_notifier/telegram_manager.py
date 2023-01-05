@@ -1,3 +1,5 @@
+# pylint: disable=W0212
+
 import copy
 import os
 from datetime import datetime
@@ -11,7 +13,6 @@ from telegram_notifier.bot import TelegramBot
 
 
 class TelegramManagerAdditionalFieldsWorker:
-
     def __init__(self):
         self.__fields = {}
 
@@ -29,6 +30,10 @@ class TelegramManagerAdditionalFieldsWorker:
 
 class TelegramManager:
     def __init__(self, config: Config):
+        self.datetime_start_tests = None
+        self.teststotal = None
+        self.testsskipped = None
+
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
         self._bot = TelegramBot(
@@ -46,18 +51,18 @@ class TelegramManager:
     @pytest.hookimpl(trylast=True)
     def pytest_telegram_notifier_message_template(self, additional_fields: dict) -> str:
         template = (
-            "---------- Test report ----------\n"
-            "\U0001F55B *Datetime start testing:* {datetimestart}\n"
-            "\U0001F567 *Datetime end testing:* {datetimeend}\n\n"
-            "\U0001F3AE *Count tests:* {teststotal}\n"
-            "\U0001F534 *Tests failed:* {testsfailed}\n"
-            "\U0001F7E2 *Tests passed:* {testspassed}\n"
-            "\U000026AA *Tests skipped:* {testsskipped}"
+            '---------- Test report ----------\n'
+            '\U0001F55B *Datetime start testing:* {datetimestart}\n'
+            '\U0001F567 *Datetime end testing:* {datetimeend}\n\n'
+            '\U0001F3AE *Count tests:* {teststotal}\n'
+            '\U0001F534 *Tests failed:* {testsfailed}\n'
+            '\U0001F7E2 *Tests passed:* {testspassed}\n'
+            '\U000026AA *Tests skipped:* {testsskipped}'
         )
         if isinstance(additional_fields, dict) and additional_fields:
-            template += "\n\n------- Additional fields -------\n"
+            template += '\n\n------- Additional fields -------\n'
             for key, value in additional_fields.items():
-                template += f"\U000025AA *{key}:* {value}\n"
+                template += f'\U000025AA *{key}:* {value}\n'
         template = template.replace('_', r'\_')
         return template
 
