@@ -46,13 +46,6 @@ repos:
     - id: flake8
       entry: pflake8
       additional_dependencies: [pyproject-flake8]
-  - repo: local
-    hooks:
-    - id: pylint
-      name: pylint
-      entry: pylint
-      language: system
-      types: [python]
   - repo: https://github.com/pycqa/isort
     rev: 5.11.4
     hooks:
