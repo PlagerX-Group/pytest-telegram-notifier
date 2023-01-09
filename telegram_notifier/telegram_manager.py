@@ -68,6 +68,10 @@ class TelegramManager:
         template = template.replace('_', r'\_')
         return template
 
+    @pytest.hookimpl(tryfirst=True)
+    def pytest_configure(self, config: Config):
+        config.stash['telegram-notifier-addfields'] = {}
+
     @pytest.hookimpl(trylast=True)
     def pytest_sessionstart(self):
         self.datetime_start_tests = datetime.now()
@@ -85,8 +89,9 @@ class TelegramManager:
 
     @pytest.hookimpl
     def pytest_sessionfinish(self, session: Session):
+        self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)
         self._additional_fields_worker.register_additional_fields(
-            self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)[0]
+            dict(self._config.stash.get('telegram-notifier-addfields', {})),
         )
 
         template = self._config.hook.pytest_telegram_notifier_message_template(
