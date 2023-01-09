@@ -31,8 +31,8 @@ class TelegramManagerAdditionalFieldsWorker:
 class TelegramManager:
     def __init__(self, config: Config):
         self.datetime_start_tests = None
-        self.teststotal = None
-        self.testsskipped = None
+        self.teststotal = 0
+        self.testsskipped = 0
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
@@ -60,6 +60,7 @@ class TelegramManager:
             '\U000026AA *Tests skipped:* {testsskipped}\n\n'
             '\U00000023 *Percentage of tests passed:* {percentpassedtests:.2f}%\n'
             '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n'
+            '\U00000023 *Percentage of tests skipped:* {percentskippedtests:.2f}%\n'
         )
         if isinstance(additional_fields, dict) and additional_fields:
             template += '\n\n------- Additional fields -------\n'
@@ -98,18 +99,21 @@ class TelegramManager:
             additional_fields=self.additional_fields_worker.fields,
         )[0]
 
-        kwargs = {
-            'datetimestart': self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
-            'datetimeend': datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
-            'teststotal': self.teststotal,
-            'testspassed': self.teststotal - session.testsfailed - self.testsskipped,
-            'testsfailed': session.testsfailed,
-            'testsskipped': self.testsskipped,
-            'percentpassedtests': 90,
-            'percentfailedtests': 10,
-        }
+        if self.teststotal > 0:
+            testspassed = self.teststotal - session.testsfailed - self.testsskipped
+            kwargs = {
+                'datetimestart': self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
+                'datetimeend': datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
+                'teststotal': self.teststotal,
+                'testspassed': self.teststotal - session.testsfailed - self.testsskipped,
+                'testsfailed': session.testsfailed,
+                'testsskipped': self.testsskipped,
+                'percentpassedtests': round(testspassed / self.teststotal * 100, 2),
+                'percentfailedtests': round(session.testsfailed / self.teststotal * 100, 2),
+                'percentskippedtests': round(self.testsskipped / self.teststotal * 100, 2),
+            }
 
-        if session.testsfailed == 0:
-            self._bot.send_passed_message(template, **kwargs)
-        else:
-            self._bot.send_failed_message(template, **kwargs)
+            if session.testsfailed == 0:
+                self._bot.send_passed_message(template, **kwargs)
+            else:
+                self._bot.send_failed_message(template, **kwargs)
