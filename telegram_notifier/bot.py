@@ -14,8 +14,6 @@ class CallModeEnum(enum.Enum):
 
 
 class TelegramBot:
-    PARSE_MODE: t.Final[str] = 'markdown'
-
     def __init__(self, configuration_path: str, /) -> None:
         self._parser = configparser.ConfigParser()
         self._parser.read(configuration_path)
@@ -33,6 +31,10 @@ class TelegramBot:
         return CallModeEnum.ON_FAIL
 
     @property
+    def parse_mode(self) -> str:
+        return self._parser.get('Telegram', 'parse_mode', fallback='markdown')
+
+    @property
     def users_call_on_fail(self) -> list[str]:
         if self._parser.get('Telegram:CallOnFail', 'enabled', fallback='false').lower() == 'true':
             return self._parser.get('Telegram:CallOnFail', 'usernames', fallback=[]).split(' ')
@@ -45,7 +47,7 @@ class TelegramBot:
         self._telegram_bot.send_message(
             self._chat_id,
             self.format_template(template, **kwargs),
-            parse_mode=TelegramBot.PARSE_MODE,
+            parse_mode=self.parse_mode,
         )
 
     def _send_message(self, sticker_code: t.Optional[str], template: str, **kwargs) -> None:
@@ -55,7 +57,7 @@ class TelegramBot:
                 self._telegram_bot.reply_to(
                     sticker_message,
                     self.format_template(template, **kwargs),
-                    parse_mode=TelegramBot.PARSE_MODE,
+                    parse_mode=self.parse_mode,
                 )
             except ApiTelegramException:
                 self._send_single_message(template, **kwargs)
