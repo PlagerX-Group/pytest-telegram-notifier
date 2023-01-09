@@ -9,7 +9,7 @@ from _pytest.config import Config
 from _pytest.main import Session
 from _pytest.nodes import Item
 
-from telegram_notifier.bot import TelegramBot
+from telegram_notifier.bot import CallModeEnum, TelegramBot
 
 
 class TelegramManagerAdditionalFieldsWorker:
@@ -67,6 +67,7 @@ class TelegramManager:
             for key, value in additional_fields.items():
                 template += f'\U000025AA *{key}:* {value}\n'
         template = template.replace('_', r'\_')
+        template += '\nI CALL: {mentioned}\n'
         return template
 
     @pytest.hookimpl(tryfirst=True)
@@ -112,6 +113,15 @@ class TelegramManager:
                 'percentfailedtests': round(session.testsfailed / self.teststotal * 100, 2),
                 'percentskippedtests': round(self.testsskipped / self.teststotal * 100, 2),
             }
+
+            if (
+                self._bot.mode == CallModeEnum.ALWAYS
+                or self._bot.mode == CallModeEnum.ON_FAIL
+                and session.testsfailed > 0
+            ):
+                kwargs.update({'mentioned': ', '.join(self._bot.users_call_on_fail)})
+            else:
+                kwargs.update({'mentioned': '<empty>'})
 
             if session.testsfailed == 0:
                 self._bot.send_passed_message(template, **kwargs)
