@@ -20,8 +20,12 @@
 ```ini
 [Telegram]
 chat-id: -99999999
-access-token: telegram-token
 
+```
+
+#### Environment variables
+```text
+TELEGRAM_ACCESS_TOKEN=<access-token>
 ```
 
 #### An example of Telegram message
