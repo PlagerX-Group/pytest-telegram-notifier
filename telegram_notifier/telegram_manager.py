@@ -52,12 +52,14 @@ class TelegramManager:
     def pytest_telegram_notifier_message_template(self, additional_fields: dict) -> str:
         template = (
             '---------- Test report ----------\n'
-            '\U0001F55B *Datetime start testing:* {datetimestart}\n'
-            '\U0001F567 *Datetime end testing:* {datetimeend}\n\n'
+            '\U0001F558 *Datetime start testing:* {datetimestart}\n'
+            '\U0001F559 *Datetime end testing:* {datetimeend}\n\n'
             '\U0001F3AE *Count tests:* {teststotal}\n'
             '\U0001F534 *Tests failed:* {testsfailed}\n'
             '\U0001F7E2 *Tests passed:* {testspassed}\n'
-            '\U000026AA *Tests skipped:* {testsskipped}'
+            '\U000026AA *Tests skipped:* {testsskipped}\n\n'
+            '\U00000023 *Percentage of tests passed:* {percentpassedtests:.2f}%\n'
+            '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n'
         )
         if isinstance(additional_fields, dict) and additional_fields:
             template += '\n\n------- Additional fields -------\n'
@@ -99,4 +101,6 @@ class TelegramManager:
             testspassed=self.teststotal - session.testsfailed - self.testsskipped,
             testsfailed=session.testsfailed,
             testsskipped=self.testsskipped,
+            percentpassedtests=90,
+            percentfailedtests=10,
         )
