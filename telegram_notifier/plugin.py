@@ -39,4 +39,4 @@ def pytest_configure(config: Config):
 
 @pytest.fixture(scope='session')
 def telegram_notifier_bot(request: FixtureRequest) -> TelegramManagerAdditionalFieldsWorker:
-    return request.config.pluginmanager.get_plugin('telegram_notifier_2').additional_fields_worker
+    return request.config.pluginmanager.get_plugin('pytest_telegram_notifier').additional_fields_worker

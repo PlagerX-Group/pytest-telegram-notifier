@@ -89,11 +89,9 @@ class TelegramManager:
 
     @pytest.hookimpl
     def pytest_sessionfinish(self, session: Session):
+        self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)
         self._additional_fields_worker.register_additional_fields(
             dict(self._config.stash.get('telegram-notifier-addfields', {})),
-        )
-        self._additional_fields_worker.register_additional_fields(
-            self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)[0]
         )
 
         template = self._config.hook.pytest_telegram_notifier_message_template(
