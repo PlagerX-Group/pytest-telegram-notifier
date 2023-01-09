@@ -34,7 +34,7 @@ def pytest_configure(config: Config):
         return
 
     manager = TelegramManager(config)
-    config.pluginmanager.register(manager, 'telegram_notifier_2')
+    config.pluginmanager.register(manager, 'pytest_telegram_notifier')
 
 
 @pytest.fixture(scope='session')
