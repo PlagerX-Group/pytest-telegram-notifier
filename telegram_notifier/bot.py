@@ -1,4 +1,5 @@
 import configparser
+import os
 import typing as t
 
 from telebot import TeleBot
@@ -11,7 +12,7 @@ class TelegramBot:
         self._parser.read(configuration_path)
 
         self._chat_id = self._parser.get('Telegram', 'chat-id')
-        self._telegram_bot = TeleBot(self._parser.get('Telegram', 'access-token'))
+        self._telegram_bot = TeleBot(os.getenv('TELEGRAM_ACCESS_TOKEN'))
 
     def _send_message(self, sticker_code: t.Optional[str], template: str, **kwargs):
         if sticker_code:
