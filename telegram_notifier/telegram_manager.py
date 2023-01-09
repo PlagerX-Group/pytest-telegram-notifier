@@ -98,14 +98,18 @@ class TelegramManager:
             additional_fields=self.additional_fields_worker.fields,
         )[0]
 
-        self._bot._send_message(
-            template,
-            datetimestart=self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
-            datetimeend=datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
-            teststotal=self.teststotal,
-            testspassed=self.teststotal - session.testsfailed - self.testsskipped,
-            testsfailed=session.testsfailed,
-            testsskipped=self.testsskipped,
-            percentpassedtests=90,
-            percentfailedtests=10,
-        )
+        kwargs = {
+            'datetimestart': self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
+            'datetimeend': datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
+            'teststotal': self.teststotal,
+            'testspassed': self.teststotal - session.testsfailed - self.testsskipped,
+            'testsfailed': session.testsfailed,
+            'testsskipped': self.testsskipped,
+            'percentpassedtests': 90,
+            'percentfailedtests': 10,
+        }
+
+        if session.testsfailed == 0:
+            self._bot.send_passed_message(template, **kwargs)
+        else:
+            self._bot.send_failed_message(template, **kwargs)
