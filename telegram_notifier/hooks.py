@@ -10,6 +10,11 @@ def pytest_telegram_notifier_init_settings():
 
 
 @pytest.hookspec(firstresult=True)
+def pytest_telegram_telegraph_title():
+    pass
+
+
+@pytest.hookspec(firstresult=True)
 def pytest_telegram_notifier_message_template(additional_fields: dict):
     pass
 

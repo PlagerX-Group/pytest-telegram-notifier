@@ -2,15 +2,19 @@
 
 import copy
 import os
+import uuid
 from datetime import datetime
 
 import pytest
 from _pytest.config import Config
 from _pytest.main import Session
-from _pytest.nodes import Item
+from _pytest.reports import TestReport
 
 from telegram_notifier.bot import CallModeEnum, TelegramBot
-from telegram_notifier.exceptions import TelegramNotifierError
+from telegram_notifier.exceptions import (
+    TelegramNotifierError,
+    TelegramNotifierTelegraphError,
+)
 
 
 class TelegramManagerAdditionalFieldsWorker:
@@ -32,6 +36,9 @@ class TelegramManagerAdditionalFieldsWorker:
 class TelegramManager:
     def __init__(self, config: Config):
         self.datetime_start_tests = None
+        self.testsskipped = 0
+
+        self.itemslongrepr = []
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
@@ -48,6 +55,10 @@ class TelegramManager:
         return {}
 
     @pytest.hookimpl(trylast=True)
+    def pytest_telegram_telegraph_title(self):
+        return f'Automation-{uuid.uuid4()} ({datetime.now()})'
+
+    @pytest.hookimpl(trylast=True)
     def pytest_telegram_notifier_message_template(self, additional_fields: dict) -> str:
         template = (
             '---------- Test report ----------\n'
@@ -55,9 +66,11 @@ class TelegramManager:
             '\U0001F559 *Datetime end testing:* {datetimeend}\n\n'
             '\U0001F3AE *Count tests:* {teststotal}\n'
             '\U0001F534 *Tests failed:* {testsfailed}\n'
-            '\U0001F7E2 *Tests passed:* {testspassed}\n\n'
+            '\U0001F7E2 *Tests passed:* {testspassed}\n'
+            '\U0001F7E2 *Tests skipped:* {testsskipped}\n\n'
             '\U00000023 *Percentage of tests passed:* {percentpassedtests:.2f}%\n'
-            '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n\n'
+            '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n'
+            '\U00000023 *Percentage of tests skipped:* {percentskippedtests:.2f}%\n\n'
         )
         if isinstance(additional_fields, dict) and additional_fields:
             template += '\n\n------- Additional fields -------\n'
@@ -75,14 +88,14 @@ class TelegramManager:
     def pytest_sessionstart(self):
         self.datetime_start_tests = datetime.now()
 
-    def pytest_collection_modifyitems(self, items: list[Item]):
-        self.testsskipped = len(
-            [
-                markers
-                for markers in [item.own_markers for item in items]
-                if 'skip' in [marker.name for marker in markers]
-            ]
-        )
+    @pytest.hookimpl(tryfirst=True)
+    def pytest_runtest_logreport(self, report: TestReport):
+        if report.when == 'setup':
+            if report.skipped:
+                self.testsskipped += 1
+        if report.when == 'call':
+            if report.failed:
+                self.itemslongrepr.append((report.fspath, str(report.longrepr)))
 
     @pytest.hookimpl(trylast=True)
     def pytest_sessionfinish(self, session: Session):
@@ -104,15 +117,17 @@ class TelegramManager:
         teststotal = session.testscollected
 
         if teststotal > 0:
-            testspassed = teststotal - session.testsfailed
+            testspassed = teststotal - session.testsfailed - self.testsskipped
             kwargs = {
                 'datetimestart': self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
                 'datetimeend': datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
                 'teststotal': teststotal,
-                'testspassed': teststotal - session.testsfailed,
+                'testspassed': teststotal - session.testsfailed - self.testsskipped,
                 'testsfailed': session.testsfailed,
+                'testsskipped': self.testsskipped,
                 'percentpassedtests': round(testspassed / teststotal * 100, 2),
                 'percentfailedtests': round(session.testsfailed / teststotal * 100, 2),
+                'percentskippedtests': round(self.testsskipped / teststotal * 100, 2),
             }
 
             if (
@@ -123,6 +138,21 @@ class TelegramManager:
                 kwargs.update({'mentioned': ', '.join(self._bot.users_call_on_fail)})
             else:
                 kwargs.update({'mentioned': '<empty>'})
+
+            if self._bot.telegraph.is_enabled:
+                telegraph_title = self._config.hook.pytest_telegram_telegraph_title()
+
+                if not isinstance(telegraph_title, str):
+                    raise TelegramNotifierTelegraphError('The "telegraph_title" type must be "str"')
+
+                if len(telegraph_title) == 0:
+                    raise TelegramNotifierTelegraphError('Text for "telegraph_title" cannot be empty')
+
+                telegraph_page_url = self._bot.telegraph.create_page(
+                    telegraph_title,
+                    stacktrace=self.itemslongrepr,
+                )
+                template += f'\n[Telegraph]({telegraph_page_url})'
 
             if session.testsfailed == 0:
                 self._bot.send_passed_message(template, **kwargs)
