@@ -10,6 +10,7 @@ from _pytest.main import Session
 from _pytest.nodes import Item
 
 from telegram_notifier.bot import CallModeEnum, TelegramBot
+from telegram_notifier.exceptions import TelegramNotifierError
 
 
 class TelegramManagerAdditionalFieldsWorker:
@@ -74,7 +75,6 @@ class TelegramManager:
     def pytest_sessionstart(self):
         self.datetime_start_tests = datetime.now()
 
-    @pytest.hookimpl(tryfirst=True)
     def pytest_collection_modifyitems(self, items: list[Item]):
         self.testsskipped = len(
             [
@@ -92,8 +92,14 @@ class TelegramManager:
         )
 
         template = self._config.hook.pytest_telegram_notifier_message_template(
-            additional_fields=self.additional_fields_worker.fields,
-        )[0]
+            additional_fields=self.additional_fields_worker.fields
+        )
+
+        if not isinstance(template, str):
+            raise TelegramNotifierError('The template type must be "str"')
+
+        if len(template) == 0:
+            raise TelegramNotifierError('Text for "template" cannot be empty')
 
         teststotal = session.testscollected
 
