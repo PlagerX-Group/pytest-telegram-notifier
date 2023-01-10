@@ -7,7 +7,6 @@ from . import hooks
 from .telegram_manager import TelegramManager, TelegramManagerAdditionalFieldsWorker
 
 
-@pytest.hookimpl
 def pytest_addoption(parser: Parser):
     group = parser.getgroup('telegram_notifier')
     group.addoption(
@@ -23,18 +22,22 @@ def pytest_addoption(parser: Parser):
     )
 
 
-@pytest.hookimpl
 def pytest_addhooks(pluginmanager: PluginManager):
     pluginmanager.add_hookspecs(hooks)
 
 
-@pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config):
     if not config.option.telegram_notifier:
         return
 
-    manager = TelegramManager(config)
-    config.pluginmanager.register(manager, 'pytest_telegram_notifier')
+    if not hasattr(config, 'workerinput'):
+        manager = TelegramManager(config)
+        config.pluginmanager.register(manager, 'pytest_telegram_notifier')
+
+
+def pytest_unconfigure(config: Config):
+    if not hasattr(config, 'workerinput'):
+        config.pluginmanager.unregister(name='pytest_telegram_notifier')
 
 
 @pytest.fixture(scope='session')

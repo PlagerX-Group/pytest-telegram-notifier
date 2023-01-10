@@ -31,8 +31,6 @@ class TelegramManagerAdditionalFieldsWorker:
 class TelegramManager:
     def __init__(self, config: Config):
         self.datetime_start_tests = None
-        self.teststotal = 0
-        self.testsskipped = 0
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
@@ -56,11 +54,9 @@ class TelegramManager:
             '\U0001F559 *Datetime end testing:* {datetimeend}\n\n'
             '\U0001F3AE *Count tests:* {teststotal}\n'
             '\U0001F534 *Tests failed:* {testsfailed}\n'
-            '\U0001F7E2 *Tests passed:* {testspassed}\n'
-            '\U000026AA *Tests skipped:* {testsskipped}\n\n'
+            '\U0001F7E2 *Tests passed:* {testspassed}\n\n'
             '\U00000023 *Percentage of tests passed:* {percentpassedtests:.2f}%\n'
-            '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n'
-            '\U00000023 *Percentage of tests skipped:* {percentskippedtests:.2f}%\n'
+            '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n\n'
         )
         if isinstance(additional_fields, dict) and additional_fields:
             template += '\n\n------- Additional fields -------\n'
@@ -78,9 +74,8 @@ class TelegramManager:
     def pytest_sessionstart(self):
         self.datetime_start_tests = datetime.now()
 
-    @pytest.hookimpl(trylast=True)
+    @pytest.hookimpl(tryfirst=True)
     def pytest_collection_modifyitems(self, items: list[Item]):
-        self.teststotal = len(items)
         self.testsskipped = len(
             [
                 markers
@@ -89,7 +84,7 @@ class TelegramManager:
             ]
         )
 
-    @pytest.hookimpl
+    @pytest.hookimpl(trylast=True)
     def pytest_sessionfinish(self, session: Session):
         self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)
         self._additional_fields_worker.register_additional_fields(
@@ -100,18 +95,18 @@ class TelegramManager:
             additional_fields=self.additional_fields_worker.fields,
         )[0]
 
-        if self.teststotal > 0:
-            testspassed = self.teststotal - session.testsfailed - self.testsskipped
+        teststotal = session.testscollected
+
+        if teststotal > 0:
+            testspassed = teststotal - session.testsfailed
             kwargs = {
                 'datetimestart': self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
                 'datetimeend': datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
-                'teststotal': self.teststotal,
-                'testspassed': self.teststotal - session.testsfailed - self.testsskipped,
+                'teststotal': teststotal,
+                'testspassed': teststotal - session.testsfailed,
                 'testsfailed': session.testsfailed,
-                'testsskipped': self.testsskipped,
-                'percentpassedtests': round(testspassed / self.teststotal * 100, 2),
-                'percentfailedtests': round(session.testsfailed / self.teststotal * 100, 2),
-                'percentskippedtests': round(self.testsskipped / self.teststotal * 100, 2),
+                'percentpassedtests': round(testspassed / teststotal * 100, 2),
+                'percentfailedtests': round(session.testsfailed / teststotal * 100, 2),
             }
 
             if (
