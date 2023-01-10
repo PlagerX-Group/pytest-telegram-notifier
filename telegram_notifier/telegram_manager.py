@@ -98,12 +98,12 @@ class TelegramManager:
         teststotal = session.testscollected
 
         if teststotal > 0:
-            testspassed = teststotal - session.testsfailed - self.testsskipped
+            testspassed = teststotal - session.testsfailed
             kwargs = {
                 'datetimestart': self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
                 'datetimeend': datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
                 'teststotal': teststotal,
-                'testspassed': teststotal - session.testsfailed - self.testsskipped,
+                'testspassed': teststotal - session.testsfailed,
                 'testsfailed': session.testsfailed,
                 'percentpassedtests': round(testspassed / teststotal * 100, 2),
                 'percentfailedtests': round(session.testsfailed / teststotal * 100, 2),
