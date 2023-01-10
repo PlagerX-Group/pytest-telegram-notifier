@@ -9,7 +9,7 @@ def pytest_telegram_notifier_init_settings():
     pass
 
 
-@pytest.hookspec
+@pytest.hookspec(firstresult=True)
 def pytest_telegram_notifier_message_template(additional_fields: dict):
     pass
 

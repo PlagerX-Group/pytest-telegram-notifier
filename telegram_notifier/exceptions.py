@@ -1,0 +1,2 @@
+class TelegramNotifierError(Exception):
+    pass
