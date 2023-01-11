@@ -8,6 +8,7 @@ import pytest
 from _pytest.config import Config
 from _pytest.main import Session
 from _pytest.nodes import Item
+from _pytest.reports import TestReport
 
 from telegram_notifier.bot import CallModeEnum, TelegramBot
 from telegram_notifier.exceptions import TelegramNotifierError
@@ -32,6 +33,7 @@ class TelegramManagerAdditionalFieldsWorker:
 class TelegramManager:
     def __init__(self, config: Config):
         self.datetime_start_tests = None
+        self.testsskipped = 0
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
@@ -55,9 +57,11 @@ class TelegramManager:
             '\U0001F559 *Datetime end testing:* {datetimeend}\n\n'
             '\U0001F3AE *Count tests:* {teststotal}\n'
             '\U0001F534 *Tests failed:* {testsfailed}\n'
-            '\U0001F7E2 *Tests passed:* {testspassed}\n\n'
+            '\U0001F7E2 *Tests passed:* {testspassed}\n'
+            '\U0001F7E2 *Tests skipped:* {testsskipped}\n\n'
             '\U00000023 *Percentage of tests passed:* {percentpassedtests:.2f}%\n'
-            '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n\n'
+            '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n'
+            '\U00000023 *Percentage of tests skipped:* {percentskippedtests:.2f}%\n\n'
         )
         if isinstance(additional_fields, dict) and additional_fields:
             template += '\n\n------- Additional fields -------\n'
@@ -70,6 +74,12 @@ class TelegramManager:
     @pytest.hookimpl(tryfirst=True)
     def pytest_configure(self, config: Config):
         config.stash['telegram-notifier-addfields'] = {}
+
+    @pytest.hookimpl(tryfirst=True)
+    def pytest_runtest_logreport(self, report: TestReport):
+        if report.when == 'setup':
+            if report.skipped:
+                self.testsskipped += 1
 
     @pytest.hookimpl(trylast=True)
     def pytest_sessionstart(self):
@@ -104,15 +114,17 @@ class TelegramManager:
         teststotal = session.testscollected
 
         if teststotal > 0:
-            testspassed = teststotal - session.testsfailed
+            testspassed = teststotal - session.testsfailed - self.testsskipped
             kwargs = {
                 'datetimestart': self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
                 'datetimeend': datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
                 'teststotal': teststotal,
-                'testspassed': teststotal - session.testsfailed,
+                'testspassed': teststotal - session.testsfailed - self.testsskipped,
                 'testsfailed': session.testsfailed,
+                'testsskipped': self.testsskipped,
                 'percentpassedtests': round(testspassed / teststotal * 100, 2),
                 'percentfailedtests': round(session.testsfailed / teststotal * 100, 2),
+                'percentskippedtests': round(self.testsskipped / teststotal * 100, 2),
             }
 
             if (
