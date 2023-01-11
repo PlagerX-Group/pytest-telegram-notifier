@@ -25,6 +25,12 @@ classifiers = [
     'Programming Language :: Python :: 3 :: Only',
     'Programming Language :: Python :: 3.9',
 ]
+dependencies = [
+    "pyTelegramBotAPI == 4.9.0",
+    "telegraph == 2.2.0",
+    "pytest == 7.1.2",
+    "requests ~= 2.28.1"
+]
 
 [project.urls]
 "Github" = "https://github.com/PlagerX-Group/pytest-telegram-notifier"

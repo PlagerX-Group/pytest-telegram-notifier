@@ -6,6 +6,8 @@ import typing as t
 from telebot import TeleBot
 from telebot.apihelper import ApiTelegramException
 
+from telegram_notifier.telegraph import TelegramTelegraph
+
 
 @enum.unique
 class CallModeEnum(enum.Enum):
@@ -20,6 +22,7 @@ class TelegramBot:
 
         self._chat_id = self._parser.get('Telegram', 'chat-id')
         self._telegram_bot = TeleBot(os.getenv('TELEGRAM_ACCESS_TOKEN'))
+        self.telegraph = TelegramTelegraph(self._parser)
 
     @property
     def mode(self) -> CallModeEnum:
