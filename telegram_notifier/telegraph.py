@@ -24,8 +24,8 @@ class TelegramTelegraph:
         if self.use_stacktrace and isinstance(stacktrace, list):
             html_content += '<h3>Stacktrace</h3>'
             for fspath, trace in stacktrace:
-                html_content += f'<h4><b>Test path:</b> {fspath}</h4>'
-                html_content += trace.replace('\n', '<br />')
+                trace = trace.replace('\n', '<br />')
+                html_content += f'<h4><b>Test path:</b>{fspath}</h4>' f'<pre><code>{trace}</code></pre>'
 
         if len(html_content) > 0:
             response = self._telegraph.create_page(title, html_content=html_content)
