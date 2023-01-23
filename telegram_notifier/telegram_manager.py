@@ -1,7 +1,6 @@
 # pylint: disable=W0212
 
 import copy
-import os
 from datetime import datetime
 
 import pytest
@@ -37,9 +36,7 @@ class TelegramManager:
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
-        self._bot = TelegramBot(
-            os.path.join(os.path.abspath(os.pardir), config.option.telegram_notifier_config_file),
-        )
+        self._bot = TelegramBot(config.option.telegram_notifier_config_file)
 
     @property
     def additional_fields_worker(self) -> TelegramManagerAdditionalFieldsWorker:
