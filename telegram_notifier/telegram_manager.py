@@ -6,7 +6,6 @@ from datetime import datetime
 import pytest
 from _pytest.config import Config
 from _pytest.main import Session
-from _pytest.nodes import Item
 from _pytest.reports import TestReport
 
 from telegram_notifier.bot import CallModeEnum, TelegramBot
@@ -81,15 +80,6 @@ class TelegramManager:
     @pytest.hookimpl(trylast=True)
     def pytest_sessionstart(self):
         self.datetime_start_tests = datetime.now()
-
-    def pytest_collection_modifyitems(self, items: list[Item]):
-        self.testsskipped = len(
-            [
-                markers
-                for markers in [item.own_markers for item in items]
-                if 'skip' in [marker.name for marker in markers]
-            ]
-        )
 
     @pytest.hookimpl(trylast=True)
     def pytest_sessionfinish(self, session: Session):
