@@ -106,11 +106,13 @@ class TelegramManager:
 
             datetimestart = self.datetime_start_tests
             datetimeend = datetime.now()
+            datetimetotal = datetimeend - datetimestart
+            datetimetotal.microseconds = 0
 
             kwargs = {
                 'datetimestart': datetimestart.strftime('%H:%M:%S %d.%m.%Y'),
                 'datetimeend': datetimeend.strftime('%H:%M:%S %d.%m.%Y'),
-                'testsduration': (datetimeend - datetimestart).strftime('%H:%M:%S %d.%m.%Y'),
+                'testsduration': str(datetimetotal),
                 'teststotal': teststotal,
                 'testspassed': teststotal - session.testsfailed - self.testsskipped,
                 'testsfailed': session.testsfailed,
