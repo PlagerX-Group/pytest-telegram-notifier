@@ -49,8 +49,9 @@ class TelegramManager:
     def pytest_telegram_notifier_message_template(self, additional_fields: dict) -> str:
         template = (
             '---------- Test report ----------\n'
-            '\U0001F558 *Datetime start testing:* {datetimestart}\n'
-            '\U0001F559 *Datetime end testing:* {datetimeend}\n\n'
+            '\U0001F558 *Datetime start testing:*\n{datetimestart}\n'
+            '\U0001F559 *Datetime end testing:*\n{datetimeend}\n'
+            '\U0001F559 *Test duration:*\n{testsduration}\n\n'
             '\U0001F3AE *Count tests:* {teststotal}\n'
             '\U0001F534 *Tests failed:* {testsfailed}\n'
             '\U0001F7E2 *Tests passed:* {testspassed}\n'
@@ -102,9 +103,14 @@ class TelegramManager:
 
         if teststotal > 0:
             testspassed = teststotal - session.testsfailed - self.testsskipped
+
+            datetimestart = self.datetime_start_tests
+            datetimeend = datetime.now()
+
             kwargs = {
-                'datetimestart': self.datetime_start_tests.strftime('%H:%M:%S %d.%m.%Y'),
-                'datetimeend': datetime.now().strftime('%H:%M:%S %d.%m.%Y'),
+                'datetimestart': datetimestart.strftime('%H:%M:%S %d.%m.%Y'),
+                'datetimeend': datetimeend.strftime('%H:%M:%S %d.%m.%Y'),
+                'testsduration': (datetimeend - datetimestart).strftime('%H:%M:%S %d.%m.%Y'),
                 'teststotal': teststotal,
                 'testspassed': teststotal - session.testsfailed - self.testsskipped,
                 'testsfailed': session.testsfailed,
