@@ -126,9 +126,13 @@ class TelegramManager:
                 or self._bot.mode == CallModeEnum.ON_FAIL
                 and session.testsfailed > 0
             ):
-                kwargs.update({'mentioned': ', '.join(self._bot.users_call_on_fail)})
+                users_call_on_fail = self._bot.users_call_on_fail
+                if len(users_call_on_fail) > 0:
+                    kwargs.update({'mentioned': ', '.join(self._bot.users_call_on_fail)})
+                else:
+                    kwargs.update({'mentioned': '-'})
             else:
-                kwargs.update({'mentioned': '<empty>'})
+                kwargs.update({'mentioned': '-'})
 
             if session.testsfailed == 0:
                 self._bot.send_passed_message(template, **kwargs)
