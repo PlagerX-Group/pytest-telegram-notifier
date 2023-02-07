@@ -19,13 +19,14 @@
 #### An example of plugin configuration:
 ```ini
 [Telegram]
-chat-id: -99999999
+parse_mode=markdown
 
 ```
 
 #### Environment variables
 ```text
-TELEGRAM_ACCESS_TOKEN=<access-token>
+TELEGRAM_BOT_CHAT_ID=<chat-id>
+TELEGRAM_BOT_ACCESS_TOKEN=<access-token>
 ```
 
 #### An example of Telegram message

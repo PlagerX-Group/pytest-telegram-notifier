@@ -6,6 +6,8 @@ import typing as t
 from telebot import TeleBot
 from telebot.apihelper import ApiTelegramException
 
+from telegram_notifier.exceptions import TelegramNotifierError
+
 
 @enum.unique
 class CallModeEnum(enum.Enum):
@@ -18,8 +20,14 @@ class TelegramBot:
         self._parser = configparser.ConfigParser()
         self._parser.read(configuration_path)
 
-        self._chat_id = self._parser.get('Telegram', 'chat-id')
-        self._telegram_bot = TeleBot(os.getenv('TELEGRAM_ACCESS_TOKEN'))
+        if chat_id := os.getenv('TELEGRAM_BOT_CHAT_ID'):
+            self._chat_id = int(chat_id)
+        else:
+            raise TelegramNotifierError('Need present environment variable "TELEGRAM_BOT_CHAT_ID"!')
+        if access_token := os.getenv('TELEGRAM_BOT_ACCESS_TOKEN'):
+            self._telegram_bot = TeleBot(access_token)
+        else:
+            raise TelegramNotifierError('Need present environment variable "TELEGRAM_BOT_ACCESS_TOKEN"!')
 
     @property
     def mode(self) -> CallModeEnum:
