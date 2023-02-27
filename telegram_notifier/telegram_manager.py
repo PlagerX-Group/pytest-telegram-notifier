@@ -35,7 +35,6 @@ class TelegramManager:
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
-        self._bot = TelegramBot(config.option.telegram_notifier_config_file)
 
     @property
     def additional_fields_worker(self) -> TelegramManagerAdditionalFieldsWorker:
@@ -84,6 +83,8 @@ class TelegramManager:
 
     @pytest.hookimpl(trylast=True)
     def pytest_sessionfinish(self, session: Session):
+        telegram_bot = TelegramBot(self._config.option.telegram_notifier_config_file)
+
         self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)
         self._additional_fields_worker.register_additional_fields(
             dict(self._config.stash.get('telegram-notifier-addfields', {})),
@@ -122,19 +123,19 @@ class TelegramManager:
             }
 
             if (
-                self._bot.mode == CallModeEnum.ALWAYS
-                or self._bot.mode == CallModeEnum.ON_FAIL
+                telegram_bot.mode == CallModeEnum.ALWAYS
+                or telegram_bot.mode == CallModeEnum.ON_FAIL
                 and session.testsfailed > 0
             ):
-                users_call_on_fail = self._bot.users_call_on_fail
+                users_call_on_fail = telegram_bot.users_call_on_fail
                 if len(users_call_on_fail) > 0:
-                    kwargs.update({'mentioned': ', '.join(self._bot.users_call_on_fail)})
+                    kwargs.update({'mentioned': ', '.join(telegram_bot.users_call_on_fail)})
                 else:
                     kwargs.update({'mentioned': '-'})
             else:
                 kwargs.update({'mentioned': '-'})
 
             if session.testsfailed == 0:
-                self._bot.send_passed_message(template, **kwargs)
+                telegram_bot.send_passed_message(template, **kwargs)
             else:
-                self._bot.send_failed_message(template, **kwargs)
+                telegram_bot.send_failed_message(template, **kwargs)
