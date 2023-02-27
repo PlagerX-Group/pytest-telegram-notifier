@@ -32,6 +32,8 @@ class TelegramManager:
     def __init__(self, config: Config):
         self.datetime_start_tests = None
         self.testsskipped = 0
+        self.testsfailed = 0
+        self.testscollected = 0
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
@@ -83,6 +85,11 @@ class TelegramManager:
 
     @pytest.hookimpl(trylast=True)
     def pytest_sessionfinish(self, session: Session):
+        self.testsfailed = session.testsfailed
+        self.testscollected = session.testscollected
+
+    @pytest.hookimpl(trylast=True)
+    def pytest_unconfigure(self):
         telegram_bot = TelegramBot(self._config.option.telegram_notifier_config_file)
 
         self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)
@@ -100,10 +107,10 @@ class TelegramManager:
         if len(template) == 0:
             raise TelegramNotifierError('Text for "template" cannot be empty')
 
-        teststotal = session.testscollected
+        teststotal = self.testscollected
 
         if teststotal > 0:
-            testspassed = teststotal - session.testsfailed - self.testsskipped
+            testspassed = teststotal - self.testsfailed - self.testsskipped
 
             datetimestart = self.datetime_start_tests
             datetimeend = datetime.now()
@@ -114,18 +121,18 @@ class TelegramManager:
                 'datetimeend': datetimeend.strftime('%H:%M:%S %d.%m.%Y'),
                 'testsduration': str(datetimetotal).rsplit('.', maxsplit=1)[0],
                 'teststotal': teststotal,
-                'testspassed': teststotal - session.testsfailed - self.testsskipped,
-                'testsfailed': session.testsfailed,
+                'testspassed': teststotal - self.testsfailed - self.testsskipped,
+                'testsfailed': self.testsfailed,
                 'testsskipped': self.testsskipped,
                 'percentpassedtests': round(testspassed / teststotal * 100, 2),
-                'percentfailedtests': round(session.testsfailed / teststotal * 100, 2),
+                'percentfailedtests': round(self.testsfailed / teststotal * 100, 2),
                 'percentskippedtests': round(self.testsskipped / teststotal * 100, 2),
             }
 
             if (
                 telegram_bot.mode == CallModeEnum.ALWAYS
                 or telegram_bot.mode == CallModeEnum.ON_FAIL
-                and session.testsfailed > 0
+                and self.testsfailed > 0
             ):
                 users_call_on_fail = telegram_bot.users_call_on_fail
                 if len(users_call_on_fail) > 0:
@@ -135,7 +142,7 @@ class TelegramManager:
             else:
                 kwargs.update({'mentioned': '-'})
 
-            if session.testsfailed == 0:
+            if self.testsfailed == 0:
                 telegram_bot.send_passed_message(template, **kwargs)
             else:
                 telegram_bot.send_failed_message(template, **kwargs)
