@@ -117,6 +117,7 @@ class TelegramManager:
             datetimetotal = datetimeend - datetimestart
 
             kwargs = {
+                'smileresult': '\U00002705' if self.testsfailed == 0 else '\U0000274C',
                 'datetimestart': datetimestart.strftime('%H:%M:%S %d.%m.%Y'),
                 'datetimeend': datetimeend.strftime('%H:%M:%S %d.%m.%Y'),
                 'testsduration': str(datetimetotal).rsplit('.', maxsplit=1)[0],
