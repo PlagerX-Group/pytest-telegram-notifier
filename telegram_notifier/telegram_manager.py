@@ -34,6 +34,7 @@ class TelegramManager:
         self.testsskipped = 0
         self.testsfailed = 0
         self.testscollected = 0
+        self.testsxfailed = 0
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
@@ -57,6 +58,7 @@ class TelegramManager:
             '\U0001F534 *Tests failed:* {testsfailed}\n'
             '\U0001F7E2 *Tests passed:* {testspassed}\n'
             '\U0001F7E2 *Tests skipped:* {testsskipped}\n\n'
+            '\U0001F7E2 *Tests xfailed:* {testsxfailed}\n\n'
             '\U00000023 *Percentage of tests passed:* {percentpassedtests:.2f}%\n'
             '\U00000023 *Percentage of tests failed:* {percentfailedtests:.2f}%\n'
             '\U00000023 *Percentage of tests skipped:* {percentskippedtests:.2f}%\n\n'
@@ -125,6 +127,7 @@ class TelegramManager:
                 'testspassed': teststotal - self.testsfailed - self.testsskipped,
                 'testsfailed': self.testsfailed,
                 'testsskipped': self.testsskipped,
+                'testsxfailed': self.testsxfailed,
                 'percentpassedtests': round(testspassed / teststotal * 100, 2),
                 'percentfailedtests': round(self.testsfailed / teststotal * 100, 2),
                 'percentskippedtests': round(self.testsskipped / teststotal * 100, 2),
