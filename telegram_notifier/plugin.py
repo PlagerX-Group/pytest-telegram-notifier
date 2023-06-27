@@ -26,20 +26,8 @@ def pytest_addhooks(pluginmanager: PluginManager):
     pluginmanager.add_hookspecs(hooks)
 
 
-def pytest_configure(config: Config):
-    if not config.option.telegram_notifier:
-        return
-
-    if not hasattr(config, 'workerinput'):
+@pytest.mark.tryfirst
+def pytest_cmdline_main(config: Config):
+    if config.option.telegram_notifier:
         manager = TelegramManager(config)
         config.pluginmanager.register(manager, 'pytest_telegram_notifier')
-
-
-def pytest_unconfigure(config: Config):
-    if not hasattr(config, 'workerinput'):
-        config.pluginmanager.unregister(name='pytest_telegram_notifier')
-
-
-@pytest.fixture(scope='session')
-def telegram_notifier_bot(request: FixtureRequest) -> TelegramManagerAdditionalFieldsWorker:
-    return request.config.pluginmanager.get_plugin('pytest_telegram_notifier').additional_fields_worker
