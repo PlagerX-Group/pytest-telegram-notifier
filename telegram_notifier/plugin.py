@@ -1,10 +1,10 @@
 import pytest
 from _pytest.config.argparsing import Parser
-from _pytest.fixtures import Config, FixtureRequest
+from _pytest.fixtures import Config
 from pluggy import PluginManager
 
 from . import hooks
-from .telegram_manager import TelegramManager, TelegramManagerAdditionalFieldsWorker
+from .telegram_manager import TelegramManager
 
 
 def pytest_addoption(parser: Parser):
