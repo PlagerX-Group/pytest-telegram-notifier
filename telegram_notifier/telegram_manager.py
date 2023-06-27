@@ -4,7 +4,7 @@ import copy
 from datetime import datetime
 
 import pytest
-from _pytest.config import Config
+from _pytest.config import Config, ExitCode
 from _pytest.main import Session
 from _pytest.reports import TestReport
 
@@ -34,6 +34,7 @@ class TelegramManager:
         self.testsskipped = 0
         self.testsfailed = 0
         self.testscollected = 0
+        self.exitstatus = None
 
         self._config = config
         self._additional_fields_worker = TelegramManagerAdditionalFieldsWorker()
@@ -85,11 +86,18 @@ class TelegramManager:
 
     @pytest.hookimpl(trylast=True)
     def pytest_sessionfinish(self, session: Session):
+        self.exitstatus = session.exitstatus
         self.testsfailed = session.testsfailed
         self.testscollected = session.testscollected
 
     @pytest.hookimpl(trylast=True)
     def pytest_unconfigure(self):
+        if hasattr(self._config, 'workerinput'):
+            return
+
+        if self.exitstatus in [ExitCode.INTERNAL_ERROR, ExitCode.USAGE_ERROR, ExitCode.INTERRUPTED]:
+            self.testsfailed = self.testscollected
+
         telegram_bot = TelegramBot(self._config.option.telegram_notifier_config_file)
 
         self._config.hook.pytest_telegram_notifier_message_additional_fields(config=self._config)
